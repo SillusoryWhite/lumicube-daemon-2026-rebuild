@@ -157,9 +157,9 @@ journalctl --user -u foundry-daemon -f               # 实时日志，观察报�
 
 ---
 
-## 8. 开机自启服务（已在 192.168.111.248 上完成配置）
+## 8. 开机自启服务
 
-为了让 daemon 在树莓派开机后自动运行，配置了 **systemd 用户级服务**（跟随 `illusorywhite` 用户会话启动）：
+为了让 daemon 在树莓派开机后自动运行，配置了 **systemd 用户级服务**：
 
 ### 文件布局
 
