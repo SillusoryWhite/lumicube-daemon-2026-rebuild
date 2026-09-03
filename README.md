@@ -155,4 +155,4 @@ systemctl --user enable --now foundry-daemon
 
 ## 版权
 
-本仓库代码源自 [Abstract Foundry Limited](https://www.abstractfoundry.com) 的 LumiCube 项目（Copyright © 2022），见 `licenseheader.txt`。
+本仓库代码源自 [Abstract Foundry Limited](https://github.com/abstractfoundry/lumicube) 的 LumiCube 项目（Copyright © 2022），见 `licenseheader.txt`。
