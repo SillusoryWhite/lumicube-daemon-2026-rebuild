@@ -50,6 +50,7 @@ public class ScriptExecutor {
 		);
 		Resources.extract(Path.of("python", "noise"), contextDirectory.resolve("noise"),
 			"open-simplex-noise-arm.so",
+			"open-simplex-noise-arm64.so",
 			"open-simplex-noise-x64.so"
 		);
 	}

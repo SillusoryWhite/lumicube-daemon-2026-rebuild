@@ -137,8 +137,12 @@ public class ModulesResource {
 			return Response.status(Status.NOT_FOUND).build();
 		}
 		var from = System.currentTimeMillis() - 10L * 1000L; // Note: Go back just 10 seconds by default.
-		var timestamps = new long[1024];
-		var values = new double[1024];
+		// Note: The microphone/speaker audio level fields are written at a high rate (roughly 143 samples per
+		// second for the microphone), so over a 10 second window there can be well over 1024 samples. The buffer
+		// must be large enough that dumpFieldTimeseries does not bail out with -1 (which made the dashboard
+		// chart appear as a flat line / empty).
+		var timestamps = new long[16384];
+		var values = new double[16384];
 		var length = store.dumpFieldTimeseries(module, key, from, timestamps, values);
 		var entries = new ArrayList<FieldTimeseriesRepresentation.Entry>();
 		for (var index = 0; index < length; index++) {

@@ -309,7 +309,11 @@
                         const order = modules.fields_order[module_name];
                         const spanning = modules.spanning_fields[module_name];
                         const nonpublic = modules.nonpublic_fields[module_name];
-                        for (const key of order.filter(key => (key in latest) && !spanning.includes(key) && !nonpublic.includes(key))) {
+                        // Note: The microphone/speaker "data" fields are spanning (large streaming buffers),
+                        // but we still surface them so the user can chart the live audio level.
+                        const is_audio_module = module_name === 'microphone' || module_name === 'speaker';
+                        const is_audio_data = key => is_audio_module && key === 'data';
+                        for (const key of order.filter(key => (key in latest) && (is_audio_data(key) || (!spanning.includes(key) && !nonpublic.includes(key))))) {
                             const columns = [];
                             const chart_visible = module_name in modules.visible_charts &&
                                 modules.visible_charts[module_name][key];

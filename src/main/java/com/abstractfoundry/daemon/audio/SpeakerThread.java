@@ -186,16 +186,27 @@ public class SpeakerThread extends Thread {
 					}
 				}
 				if (emit) {
+					// (2.5) Track the peak level of the samples being relayed, so the web dashboard
+					// can display a live audio-level chart for the speaker module (the speaker.data field
+					// is otherwise never published back from the cube and would remain a flat line).
+					var peak = 0;
 					// (3) Serialise the batches.
 					for (var batchNumber = 0; batchNumber < BATCH_COUNT; batchNumber++) {
 						for (var index = 0; index < samples.length; index++) {
 							keys[index] = index + floorKey;
-							samples[index] = scratchpad.getShort() / VOLUME_REDUCTION;
+							var sample = scratchpad.getShort() / VOLUME_REDUCTION;
+							samples[index] = sample;
+							var magnitude = Math.abs(sample);
+							if (magnitude > peak) {
+								peak = magnitude;
+							}
 						}
 						var length = FlatDictionary.serialise(buffers[batchNumber].array(), 0, keys, samples, 0, samples.length, cachedMetadata);
 						buffers[batchNumber].limit(length);
 						buffers[batchNumber].position(0);
 					}
+					// Persist the speaker output level into the Store / RedisTimeSeries.
+					store.putLatestFields(destinationId, new int[] { floorKey }, new int[] { peak }, 1);
 					// (4) Make the request.
 					final int requestPriority = 20; // TODO: Make configurable.
 					try {

@@ -22,7 +22,14 @@ def _init(context):
 
 
 def _platform_variant():
-    return 'arm' if 'arm' in _platform.machine() else 'x64'
+    # Note: On 64-bit ARM (aarch64/arm64) platforms "platform.machine()" returns "aarch64", which does not
+    # contain the substring "arm" - the naive check below would wrongly select the x86-64 library. Also, the
+    # original "arm" variant is a 32-bit ARM (armv7) build, which cannot be dlopen'd from a 64-bit Python
+    # process. We therefore prefer an explicit aarch64 native build when present.
+    machine = _platform.machine().lower()
+    if 'aarch64' in machine or machine == 'arm64':
+        return 'arm64'
+    return 'arm' if 'arm' in machine else 'x64'
 
 
 class _DaemonClient:

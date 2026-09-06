@@ -213,7 +213,14 @@ def display_scroll_text(display, text, colour=0xFFFFFF, background_colour=0x0, s
         return new_array
     from PIL import Image, ImageDraw, ImageFont
     font = ImageFont.truetype('fonts/slkscr.ttf', 8)
-    (width, height) = font.getsize(text)
+    # Note: Pillow >= 10 removed FreeTypeFont.getsize(); use getbbox() for compatibility
+    # (the tree-sitter context uses Pillow 11.x, where getsize no longer exists).
+    if hasattr(font, 'getsize'):
+        (width, height) = font.getsize(text)
+    else:
+        bbox = font.getbbox(text)
+        width = bbox[2] - bbox[0]
+        height = bbox[3] - bbox[1]
     width += 16 * 2
     image = Image.new('I', (width, 8))
     draw = ImageDraw.Draw(image)

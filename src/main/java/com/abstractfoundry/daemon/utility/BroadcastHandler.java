@@ -64,11 +64,19 @@ public class BroadcastHandler { // TODO: This class is fairly hacked-up, impleme
 						try {
 							samples.clear();
 							samples.order(ByteOrder.LITTLE_ENDIAN); // The virtual microphone consumes "s16le" samples.
+							var peak = 0; // Note: Record the peak sample magnitude so the web dashboard can display a live audio-level chart for the microphone module.
 							for (var index = 0; index < count; index++) {
 								var sample = (short) values[index];
 								samples.putShort(sample);
+								var magnitude = Math.abs(values[index]);
+								if (magnitude > peak) {
+									peak = magnitude;
+								}
 							}
 							virtualMicrophone.push(samples.array(), 0, samples.position()); // TODO: This does blocking I/O, to prevent holding up the inbox disruptor copy the buffer and offload to the global pool.
+							// Note: Persist the microphone level (as well as streaming it to the virtual microphone) so
+							// that the field appears in the Store / RedisTimeSeries and the dashboard chart is not flat.
+							store.putLatestFields(sourceId, new int[] { microphoneKey }, new int[] { peak }, 1);
 						} catch (IOException exception) {
 							logger.error("Error pushing data to virtual microphone.", exception);
 						}
